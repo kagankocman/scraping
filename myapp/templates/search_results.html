@@ -1,0 +1,197 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Result</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .scrollable-checkboxes {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        li a {
+            text-decoration: none;
+            color: #007bff;
+            margin-left: 10px;
+        }
+
+        li a:hover {
+            text-decoration: underline;
+        }
+
+        p {
+            text-align: center;
+            color: #666;
+        }
+
+      
+        .filter-and-sort {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .publication-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .publication-item {
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .column-1 {
+            flex: 8;
+        }
+
+        .column-2,
+        .column-3 {
+            flex: 1;
+            text-align: center;
+        }
+
+        .no-publications {
+            text-align: center;
+        }
+
+        .filter-button {
+            margin-top: 7%;
+           
+        }
+
+        #sort-container {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            margin-left: 20px;
+
+        }
+
+        #sort-label {
+            margin-right: 5px;
+
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Search Result</h1>
+    <div class="filter-and-sort"> <!-- Yeni div eklendi -->
+        <form id="filterForm" method="get" action="{% url 'search_results' %}">
+            <div class="scrollable-checkboxes">
+                <!-- Filtreleme seçenekleri -->
+                <label><input type="checkbox" name="filters" value="YayinID"> Yayın ID</label><br>
+                <label><input type="checkbox" name="filters" value="YayinAdi"> Yayın Adı</label><br>
+                <label><input type="checkbox" name="filters" value="Yazarlar"> Yazarlar</label><br>
+                <label><input type="checkbox" name="filters" value="YayinTuru"> Yayın Türleri</label><br>
+                <label><input type="checkbox" name="filters" value="YayinciAdi"> Yayımcı Adı</label><br>
+                <label><input type="checkbox" name="filters" value="Ozet"> Özet</label><br>
+                <label><input type="checkbox" name="filters" value="Referanslar"> Referanslar</label><br>
+                <label><input type="checkbox" name="filters" value="URL"> URL</label><br>
+                <label><input type="checkbox" name="filters" value="YayinlanmaTarihi"> Yayımlanma Tarihi</label><br>
+                <label><input type="checkbox" name="filters" value="Doi"> DOI Numarası</label><br>
+                <label><input type="checkbox" name="filters" value="MakaleAnahtarKelimeleri"> Makaleye Ait
+                    Anahtar Kelimeler</label><br>
+            </div>
+            <div>
+                <div id="sort-container">
+                    <label for="sort" id="sort-label">Sırala:</label>
+                    <select name="sort" id="sort">
+                        <option value="yeniden_eskiye">Yeniden Eskiye</option>
+                        <option value="eskiden_yeniye">Eskiden Yeniye</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="filter-button">Filtrele</button>
+        </form>
+    </div>
+
+    <p>Found publications:</p>
+    <ul class="publication-list">
+        {% for result in results %}
+        <li class="publication-item">
+            <div class="column-1">
+                {% for filter in selected_filters %}
+                {% if filter in result %}
+                {{ result|get_item:filter }}{% if not forloop.last %} - {% endif %}
+                {% endif %}
+                {% endfor %}
+                {% if not selected_filters %}
+                {{ result.YayinAdi }}
+                {% endif %}
+            </div>
+            <div class="column-2">
+                <a href="{% url 'view_details' result.YayinID %}">View Details</a>
+            </div>
+            <div class="column-3">
+                <a href="{% url 'download_pdf' result.YayinID %}">Download PDF</a>
+            </div>
+        </li>
+        {% empty %}
+        <li class="no-publications">No publications found.</li>
+        {% endfor %}
+    </ul>
+
+
+</body>
+
+</html>
